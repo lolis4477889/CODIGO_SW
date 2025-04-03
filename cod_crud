@@ -1,0 +1,58 @@
+from flask import Flask, render_template, redirect, request, url_for
+import mysql.connector
+app= Flask(_name_)
+
+def get_db_connection():
+    return mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="tienda_da"
+    )
+
+@app.route("/")
+def home():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM clientes")
+    cursor.close()
+    conn.close()
+    return render_template("index.html")
+
+@app.route("/add", methods=["POST"])
+def add():
+    Id = int(request.form["id"])
+    Nombre = request.form["Nombre"]
+    Email = request.form["Email"]
+    Rol = request.form["rol"]
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO clientes (id, Nombre, Email, , rol) VALUES ( %s, %s, %s, %s)", (Id, Nombre, Email, Rol))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect("index.html")
+
+@app.route("/update/<int:id>", methods=["POST"])
+def update(id):
+    Id = int(request.form["id"])
+    Nombre = request.form["Nombre"]
+    Email = request.form["Email"]
+    Rol = request.form["rol"]
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE clientes SET id = %s, Nombre = %s, Email = %s, rol = %s WHERE id = %s", ( Nombre, Email, Rol, id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for("home"))
+
+@app.route("/delete/<int:id>")
+def delete(id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM clientes WHERE id = %s", (id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for("home"))
